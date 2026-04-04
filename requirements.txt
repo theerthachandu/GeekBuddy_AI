@@ -1,0 +1,5 @@
+streamlit
+langchain
+pypdf
+python-dotenv
+langchain-groq
