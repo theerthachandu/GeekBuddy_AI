@@ -1,4 +1,4 @@
-﻿import hashlib
+import hashlib
 import os
 import re
 from collections import defaultdict
@@ -63,6 +63,7 @@ html, body, [class*="css"], input, textarea, button {
 [data-testid="stSidebar"] {
     background: linear-gradient(180deg, #ffffff 0%, #f7f9fc 100%);
     border-right: 1px solid rgba(80, 93, 122, 0.12);
+    color: #172033;
 }
 
 [data-testid="stSidebar"] .block-container {
@@ -198,6 +199,55 @@ textarea {
     padding: 0.4rem;
 }
 
+[data-testid="stFileUploader"] label,
+[data-testid="stFileUploader"] small,
+[data-testid="stFileUploader"] span,
+[data-testid="stFileUploader"] p,
+[data-testid="stFileUploader"] div {
+    color: #172033 !important;
+}
+
+[data-testid="stFileUploader"] section {
+    color: #172033 !important;
+}
+
+[data-testid="stFileUploader"] button {
+    color: #172033 !important;
+}
+
+[data-testid="stFileUploaderDropzone"] {
+    background: #1e293b !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    border-radius: 14px !important;
+    color: #f8fafc !important;
+}
+
+[data-testid="stFileUploaderDropzone"] * {
+    color: #f8fafc !important;
+    opacity: 1 !important;
+}
+
+[data-testid="stFileUploaderDropzone"] small,
+[data-testid="stFileUploaderDropzone"] span,
+[data-testid="stFileUploaderDropzone"] p,
+[data-testid="stFileUploaderDropzone"] div {
+    color: #f8fafc !important;
+}
+
+[data-testid="stFileUploaderDropzone"] button {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 10px !important;
+    box-shadow: none !important;
+    font-weight: 600 !important;
+}
+
+[data-testid="stFileUploaderDropzone"] button:hover {
+    background: #f8fafc !important;
+    border-color: #94a3b8 !important;
+}
+
 [data-testid="stFileUploaderFile"] {
     background: rgba(255, 255, 255, 0.92);
     border: 1px solid rgba(71, 85, 105, 0.14);
@@ -256,6 +306,11 @@ textarea {
 
 [data-testid="stAlert"] * {
     color: inherit !important;
+}
+
+[data-testid="stSidebar"] .stButton {
+    margin-top: 0.8rem;
+    margin-bottom: 0.8rem;
 }
 
 [data-testid="stMarkdownContainer"] h1,
@@ -727,13 +782,8 @@ def render_sidebar() -> tuple[list, str]:
             chat_model_name = st.text_input("Groq chat model", value=DEFAULT_CHAT_MODEL)
         if st.button("Clear chat", use_container_width=True):
             reset_chat()
-        if uploaded_files:
-            st.markdown('<div class="file-list-card">', unsafe_allow_html=True)
-            st.markdown("**Uploaded files**")
-            for uploaded_file in uploaded_files:
-                st.markdown(f"<p>{uploaded_file.name}</p>", unsafe_allow_html=True)
-            st.markdown("</div>", unsafe_allow_html=True)
         st.caption("Tip: start with the summary, then ask short follow-up questions.")
+        st.markdown("---")
         render_footer()
 
     return uploaded_files, chat_model_name
@@ -780,6 +830,12 @@ def main() -> None:
     if not uploaded_files:
         st.info("Upload one or more PDF files from the left panel to get started.")
         st.markdown("You can use this app to make a quick summary, clarify tough topics, and ask follow-up questions.")
+        with st.container(border=True):
+            st.subheader("How To Study Here")
+            st.write("1. Upload your notes from the sidebar.")
+            st.write("2. Create the summary to get the big picture.")
+            st.write("3. Ask questions like you would ask a tutor.")
+            st.write("4. If needed, ask for a simpler explanation or shorter answer.")
         st.stop()
 
     try:
@@ -788,13 +844,14 @@ def main() -> None:
         st.error(f"Document processing failed: {exc}")
         st.stop()
 
-    tools_col, help_col = st.columns([1, 1.2])
-    with tools_col:
+    st.markdown('<div class="surface-card">', unsafe_allow_html=True)
+    st.markdown('<div class="section-label">Study Tools</div>', unsafe_allow_html=True)
+    action_col, helper_col = st.columns([1, 1.2])
+    with action_col:
         st.markdown('<div class="surface-card">', unsafe_allow_html=True)
-        st.markdown('<div class="section-label">Study Tools</div>', unsafe_allow_html=True)
         if st.button("Generate Study Summary", use_container_width=True):
             try:
-                with st.spinner("Creating a study summary..."):
+                with st.spinner("Analyzing your notes..."):
                     st.session_state.summary_cache = generate_summary(
                         st.session_state.chunk_records,
                         chat_model_name,
@@ -804,19 +861,21 @@ def main() -> None:
                 st.error(f"Summary generation failed: {exc}")
         st.caption("Generate a clean revision summary before you start chatting.")
         st.markdown('</div>', unsafe_allow_html=True)
-    with help_col:
-        st.markdown('<div class="surface-card">', unsafe_allow_html=True)
-        st.markdown('<div class="section-label">How To Study Here</div>', unsafe_allow_html=True)
-        st.write("1. Upload your notes from the sidebar.")
-        st.write("2. Create the summary to get the big picture.")
-        st.write("3. Ask questions like you would ask a tutor.")
-        st.write("4. If needed, ask for a simpler explanation or shorter answer.")
-        st.markdown('</div>', unsafe_allow_html=True)
+    with helper_col:
+        st.write("Generate a clean revision summary before you start chatting, then ask follow-up questions below.")
+    st.markdown('</div>', unsafe_allow_html=True)
 
     if st.session_state.summary_cache:
         st.subheader("Study Summary")
         with st.container(border=True):
             st.markdown(st.session_state.summary_cache)
+            st.download_button(
+                "Download Summary",
+                data=st.session_state.summary_cache,
+                file_name="geekbuddy-study-summary.md",
+                mime="text/markdown",
+                use_container_width=False,
+            )
     else:
         st.subheader("Study Summary")
         with st.container(border=True):
