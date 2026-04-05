@@ -1,4 +1,4 @@
-﻿import hashlib
+import hashlib
 import os
 import re
 from collections import defaultdict
@@ -257,6 +257,27 @@ textarea {
 [data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] p,
 [data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] div {
     color: #f8fafc !important;
+    -webkit-text-fill-color: #f8fafc !important;
+    text-shadow: 0 1px 1px rgba(15, 23, 42, 0.35);
+}
+
+[data-testid="stFileUploaderDropzoneInstructions"],
+[data-testid="stFileUploaderDropzoneInstructions"] *,
+[data-testid="stFileUploaderDropzone"] [data-testid="stMarkdownContainer"],
+[data-testid="stFileUploaderDropzone"] [data-testid="stMarkdownContainer"] *,
+[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] [data-testid="stMarkdownContainer"],
+[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] [data-testid="stMarkdownContainer"] * {
+    color: #f8fafc !important;
+    -webkit-text-fill-color: #f8fafc !important;
+    opacity: 1 !important;
+}
+
+[data-testid="stFileUploaderDropzone"] svg,
+[data-testid="stFileUploaderDropzone"] path,
+[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] svg,
+[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] path {
+    fill: #f8fafc !important;
+    stroke: #f8fafc !important;
 }
 
 [data-testid="stFileUploaderDropzone"] button,
@@ -811,6 +832,7 @@ def render_sidebar() -> tuple[list, str]:
             '<div class="sidebar-copy">Upload your PDF notes, make a quick summary, and ask questions in simple language.</div>',
             unsafe_allow_html=True,
         )
+        st.caption("Upload PDF notes here. Drag and drop files or click Browse files. PDF only, up to 200MB each.")
         uploaded_files = st.file_uploader(
             "Upload your study PDFs",
             type=["pdf"],
@@ -960,4 +982,3 @@ def render_footer() -> None:
 
 if __name__ == "__main__":
     main()
-
